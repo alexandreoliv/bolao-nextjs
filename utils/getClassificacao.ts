@@ -1,26 +1,55 @@
-export const getClassificacao = (keys, apostasData) => {
-	const filteredKeys = keys.filter((k) => k !== "Equipe" && k !== "Atual");
-	const pontuacaoDetalhada = getPontuacaoDetalhada(filteredKeys, apostasData);
+import { ApostasProps, TabelaObject, TableData } from "@/types";
+import { GridColDef } from "@mui/x-data-grid";
+import {
+	getApostasColumns,
+	getApostasKeys,
+	getApostasRows,
+} from "./getApostas";
+
+export const getTabela = async (ano: string, serie: string) => {
+	const response = await fetch(
+		`http://localhost:3000/api/get-tabela/${ano}/${serie}`
+	);
+	const tabela: TabelaObject = await response.json();
+	return tabela;
+};
+
+export const getClassificacaoTableData = (
+	tabela: TabelaObject,
+	apostas: ApostasProps
+) => {
+	const apostasColumns = getApostasColumns(apostas);
+	const apostasKeys = getApostasKeys(apostasColumns);
+	const apostasRows = getApostasRows(
+		apostas,
+		apostasColumns,
+		apostasKeys,
+		tabela
+	);
+
+	const filteredKeys = apostasKeys.filter(
+		(k) => k !== "Equipe" && k !== "Atual"
+	);
+	const pontuacaoDetalhada = getPontuacaoDetalhada(filteredKeys, apostasRows);
 	const pontuacaoFinal = getPontuacaoFinal(pontuacaoDetalhada);
-	const classificacaoData = getClassificacaoData(
-		filteredKeys,
-		pontuacaoFinal
-	);
-	const classificacaoColumns = getClassificacaoColumns();
 
-	return {
-		classificacaoColumns,
-		classificacaoData,
-	};
+	const rows = getClassificacaoRows(filteredKeys, pontuacaoFinal);
+	const columns = getClassificacaoColumns();
+
+	const data: TableData = { rows, columns };
+	return data;
 };
 
-const getPontuacaoDetalhada = (filteredKeys, apostasData) => {
+const getPontuacaoDetalhada = (
+	filteredKeys: string[],
+	apostasRows: { [key: string]: number }[]
+): number[][] => {
 	return filteredKeys.map((k) =>
-		apostasData.map((e) => calculaPontuacao(e[k] - e["Atual"]))
+		apostasRows.map((e) => calculaPontuacao(e[k] - e["Atual"])!)
 	);
 };
 
-const calculaPontuacao = (distancia) => {
+const calculaPontuacao = (distancia: number) => {
 	if (distancia === 0) return 5;
 	if (Math.abs(distancia) === 1) return 3;
 	if (Math.abs(distancia) === 2) return 1;
@@ -30,60 +59,75 @@ const calculaPontuacao = (distancia) => {
 	if (Math.abs(distancia) >= 6) return -5;
 };
 
-const getPontuacaoFinal = (pontuacaoDetalhada) => {
+const getPontuacaoFinal = (pontuacaoDetalhada: number[][]) => {
 	return pontuacaoDetalhada.map((p) =>
 		p.reduce((prev, cur) => prev + cur, 0)
 	);
 };
 
-const getClassificacaoData = (filteredKeys, pontuacaoFinal) => {
-	let classificacaoData = [];
-	for (let i = 0; i < filteredKeys.length; i++) {
-		classificacaoData[i] = {};
-		classificacaoData[i]["nome"] = filteredKeys[i];
-		classificacaoData[i]["pontuacao"] = pontuacaoFinal[i];
-		classificacaoData[i]["key"] = filteredKeys[i];
-	}
+const getClassificacaoRows = (
+	filteredKeys: string[],
+	pontuacaoFinal: number[]
+) => {
+	const classificacaoData: {
+		id: number;
+		nome: string;
+		pontuacao: number;
+		posicao: number;
+	}[] = filteredKeys.map((nome, i) => ({
+		id: i,
+		nome,
+		pontuacao: pontuacaoFinal[i],
+		posicao: 0,
+	}));
+
 	classificacaoData.sort((a, b) => b.pontuacao - a.pontuacao);
 	return addPosicaoApostador(classificacaoData);
 };
 
-const addPosicaoApostador = (classificacaoData) => {
-	let clone = JSON.parse(JSON.stringify(classificacaoData));
-	clone[0].posicao = 1;
-	for (let i = 1; i < clone.length; i++) {
-		if (clone[i].pontuacao === clone[i - 1].pontuacao)
-			clone[i].posicao = clone[i - 1].posicao;
-		else clone[i].posicao = i + 1;
-	}
-	return clone;
+const addPosicaoApostador = (
+	classificacaoData: {
+		id: number;
+		nome: string;
+		pontuacao: number;
+		posicao: number;
+	}[]
+) => {
+	const sortedData = [...classificacaoData].sort(
+		(a, b) => b.pontuacao - a.pontuacao
+	);
+
+	const result = sortedData.map((item, index) => {
+		item.posicao =
+			index === 0 || item.pontuacao !== sortedData[index - 1].pontuacao
+				? index + 1
+				: sortedData[index - 1].posicao;
+		return item;
+	});
+
+	return result;
 };
 
 const getClassificacaoColumns = () => {
-	return [
+	const columns: GridColDef[] = [
 		{
-			title: "Posição",
-			ellipsis: true,
-			key: "posicao",
-			dataIndex: "posicao",
-			align: "center",
-			width: "15%",
+			field: "posicao",
+			headerName: "Posição",
+			type: "string",
+			width: 80,
 		},
 		{
-			title: "Nome",
-			ellipsis: true,
-			key: "nome",
-			dataIndex: "nome",
-			align: "center",
-			width: "30%",
+			field: "nome",
+			headerName: "Nome",
+			type: "string",
+			width: 130,
 		},
 		{
-			title: "Pontuação",
-			ellipsis: true,
-			key: "pontuacao",
-			dataIndex: "pontuacao",
-			align: "center",
-			width: "15%",
+			field: "pontuacao",
+			headerName: "Pontuação",
+			type: "string",
+			width: 80,
 		},
 	];
+	return columns;
 };
