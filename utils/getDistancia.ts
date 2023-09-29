@@ -1,28 +1,46 @@
-export const getDistancia = (keys, apostasData) => {
-	const distanciaData = getDistanciaData(apostasData, keys);
-	const distanciaColumns = getDistanciaColumns(keys);
+import { ApostasProps, TabelaObject, TableData } from "@/types";
+import { GridColDef } from "@mui/x-data-grid";
+import {
+	getApostasColumns,
+	getApostasKeys,
+	getApostasRows,
+} from "./getApostas";
 
-	return {
-		distanciaColumns,
-		distanciaData,
-	};
+export const getDistanciaTableData = (
+	tabela: TabelaObject,
+	apostas: ApostasProps
+) => {
+	const apostasColumns = getApostasColumns(apostas);
+	const apostasKeys = getApostasKeys(apostasColumns);
+	const apostasRows = getApostasRows(
+		apostas,
+		apostasColumns,
+		apostasKeys,
+		tabela
+	);
+
+	const rows = getDistanciaRows(apostasRows, apostasKeys);
+	const columns = getDistanciaColumns(apostas);
+
+	const data: TableData = { rows, columns };
+	return data;
 };
 
-const getDistanciaData = (apostasData, keys) => {
-	const distanciaData = [];
-	for (let i = 0; i < apostasData.length; i++) {
-		distanciaData[i] = JSON.parse(JSON.stringify(apostasData[i]));
-		for (let j = 2; j < keys.length; j++) {
-			// ignoring "Equipe" and "Atual"
-			distanciaData[i][keys[j]] =
-				apostasData[i][keys[j]] - apostasData[i].Atual;
-		}
-	}
-	distanciaData.sort((a, b) => a.Atual - b.Atual);
-	return distanciaData;
+const getDistanciaRows = (apostasRows: any[], apostasKeys: string[]) => {
+	return apostasRows
+		.map((row, i) => {
+			const distanciaRow = { ...row };
+			for (let j = 2; j < apostasKeys.length; j++) {
+				// ignoring "Equipe" and "Atual"
+				distanciaRow[apostasKeys[j]] = row[apostasKeys[j]] - row.Atual;
+			}
+			distanciaRow.id = i;
+			return distanciaRow;
+		})
+		.sort((a, b) => a.Atual - b.Atual);
 };
 
-const getDistanciaColumns = (keys) => {
+export const getDistanciaColumns = (apostas: ApostasProps) => {
 	const colours = [
 		"#5cbd8c",
 		"#76c79f",
@@ -46,23 +64,27 @@ const getDistanciaColumns = (keys) => {
 		"#e68181",
 	];
 
-	const distanciaColumns = keys.map((k, index) => ({
-		title: k,
-		ellipsis: true,
-		key: k,
-		dataIndex: k,
-		width: index === 0 ? "10%" : "",
-		render: (text, record) => ({
-			props: {
-				style: {
-					background:
-						k !== "Atual" ? colours[Math.abs(text)] : "white",
-				},
-			},
-			children: <div>{text}</div>,
-		}),
-		align: "center",
+	const sortedApostas = apostas.sort((a, b) => (a.nome < b.nome ? -1 : 1)); // sort names alphabetically
+
+	const columns: GridColDef[] = sortedApostas.map((a) => ({
+		field: a.nome,
+		headerName: a.nome,
+		type: "string",
+		width: 80,
 	}));
 
-	return distanciaColumns;
+	columns.unshift({
+		field: "Atual",
+		headerName: "Atual",
+		type: "string",
+		width: 80,
+	});
+	columns.unshift({
+		field: "Equipe",
+		headerName: "Equipe",
+		type: "string",
+		width: 130,
+	});
+
+	return columns;
 };
