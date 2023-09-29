@@ -1,57 +1,54 @@
-const axios = require("axios");
+import { ApostasProps, TabelaObject, TableData } from "@/types";
+import { GridColDef } from "@mui/x-data-grid";
 
-export const getApostas = async (serie, ano, tabela) => {
-	const apostas = await getFile(serie, ano);
-	const apostasColumns = getColumns(apostas);
-	const keys = getKeys(apostasColumns);
-	const apostasData = getData(apostas, apostasColumns, keys, tabela);
-	return { apostasColumns, apostasData, keys };
+export const getApostas = async (ano: string, serie: string) => {
+	const response = await fetch(
+		`http://localhost:3000/api/get-apostas/${ano}/${serie}`
+	);
+	const apostas: ApostasProps = await response.json();
+	return apostas;
 };
 
-const getFile = (ano, serie) => {
-	return axios
-		.get(
-			`${process.env.REACT_APP_API_URL}/getApostas?ano=${ano}&serie=${serie}`
-		)
-		.then((response) => response.data.apostas)
-		.catch((error) => console.log(error));
-};
+export const getApostasColumns = (apostas: ApostasProps) => {
+	const sortedApostas = apostas.sort((a, b) => (a.nome < b.nome ? -1 : 1)); // sort names alphabetically
 
-const getColumns = (apostas) => {
-	let sortedApostas = apostas.sort((a, b) => (a.nome < b.nome ? -1 : 1)); // sort names alphabetically
-	const columns = sortedApostas.map((a) => ({
-		title: a.nome,
-		ellipsis: true,
-		key: a.nome,
-		dataIndex: a.nome,
-		align: "center",
+	const columns: GridColDef[] = sortedApostas.map((a) => ({
+		field: a.nome,
+		headerName: a.nome,
+		type: "string",
+		width: 80,
 	}));
+
 	columns.unshift({
-		title: "Atual",
-		ellipsis: true,
-		key: "Atual",
-		dataIndex: "Atual",
-		align: "center",
+		field: "Atual",
+		headerName: "Atual",
+		type: "string",
+		width: 80,
 	});
 	columns.unshift({
-		title: "Equipe",
-		ellipsis: true,
-		key: "Equipe",
-		dataIndex: "Equipe",
-		align: "center",
-		width: "10%",
+		field: "Equipe",
+		headerName: "Equipe",
+		type: "string",
+		width: 130,
 	});
+
 	return columns;
 };
 
-const getKeys = (apostasColumns) => {
-	return apostasColumns.map((c) => c.title);
+export const getApostasKeys = (apostasColumns: GridColDef[]) => {
+	const keys: string[] = apostasColumns.map((c) => c.headerName!);
+	return keys;
 };
 
-const getData = (apostas, apostasColumns, keys, tabela) => {
+export const getApostasRows = (
+	apostas: ApostasProps,
+	columns: GridColDef[],
+	keys: string[],
+	tabela: TabelaObject
+) => {
 	const { equipes, posicoes } = tabela;
 
-	const palpites = apostas.map((a) => a.aposta);
+	const palpites: any[][] = apostas.map((a) => a.aposta);
 	palpites.unshift(posicoes);
 	palpites.unshift(equipes);
 
@@ -59,17 +56,29 @@ const getData = (apostas, apostasColumns, keys, tabela) => {
 		return { ...accumulator, [value]: "" };
 	}, {});
 
-	const apostasData = [];
+	const rows = [];
 	for (let j = 0; j < equipes.length; j++) {
-		apostasData[j] = JSON.parse(JSON.stringify(obj));
-		for (let i = 0; i < apostasColumns.length; i++) {
-			apostasData[j][keys[i]] = palpites[i][j];
-			apostasData[j].key = j;
+		rows[j] = JSON.parse(JSON.stringify(obj));
+		for (let i = 0; i < columns.length; i++) {
+			rows[j][keys[i]] = palpites[i][j];
+			rows[j].id = j;
 		}
 	}
 
 	// sorts the teams according to their standings
-	apostasData.sort((a, b) => (a.Atual < b.Atual ? -1 : 1));
+	rows.sort((a, b) => (a.Atual < b.Atual ? -1 : 1));
 
-	return apostasData;
+	return rows;
+};
+
+export const getApostasTableData = (
+	tabela: TabelaObject,
+	apostas: ApostasProps
+) => {
+	const columns = getApostasColumns(apostas);
+	const keys = getApostasKeys(columns);
+	const rows = getApostasRows(apostas, columns, keys, tabela);
+
+	const data: TableData = { rows, columns };
+	return data;
 };
