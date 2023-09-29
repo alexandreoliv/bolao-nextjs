@@ -20,8 +20,8 @@ export async function GET(
 
 	const aposta = await prisma.apostas.findMany({
 		where: {
-			ano: ano,
-			serie: serie,
+			ano,
+			serie,
 		},
 		select: {
 			nome: true,
