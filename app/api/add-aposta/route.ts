@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
 	const isValidAposta = validateAposta(body);
 	if (!isValidAposta) {
-		return NextResponse.json({ error: "Dados inválidos" }, { status: 404 });
+		return NextResponse.json({ error: "Aposta inválida" }, { status: 400 });
 	}
 
 	const { aposta, nome, ano } = body;

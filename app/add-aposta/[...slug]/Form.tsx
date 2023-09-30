@@ -1,31 +1,19 @@
 "use client";
 
 import {
+	Alert,
+	AlertColor,
 	Button,
 	Container,
 	FormControl,
 	InputLabel,
 	MenuItem,
 	Select,
+	Snackbar,
 	TextField,
 	Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-
-export const sendAposta = async (obj: {
-	ano: number;
-	serie: string;
-	nome: string;
-	aposta: number[];
-}) => {
-	const response = await fetch(`http://localhost:3000/api/add-aposta/`, {
-		method: "POST",
-		body: JSON.stringify(obj),
-	});
-
-	// TODO: add error handling
-	return;
-};
 
 const Form = ({
 	equipes,
@@ -45,6 +33,9 @@ const Form = ({
 	const [usedNumeros, setUsedNumeros] = useState<number[]>([]);
 	const [nome, setNome] = useState("");
 	const [disabled, setDisabled] = useState(false);
+	const [open, setOpen] = useState(false);
+	const [severity, setSeverity] = useState<AlertColor>("info");
+	const [message, setMessage] = useState("");
 
 	useEffect(() => {
 		if (equipes) {
@@ -82,20 +73,47 @@ const Form = ({
 		setPosicoes(posicoesNew);
 	};
 
-	const onFinish = async () => {
-		try {
-			const aposta = equipes.map(
-				(e) => posicoes.find((p) => p.equipe === e)?.posicao!
-			);
+	const onFinish = async (e: React.FormEvent) => {
+		e.preventDefault();
 
-			const obj = { ano, serie, nome, aposta };
-			setDisabled(true);
+		const aposta = equipes.map(
+			(e) => posicoes.find((p) => p.equipe === e)?.posicao!
+		);
 
-			const response = await sendAposta(obj);
-			console.log({ response });
-		} catch (error) {
-			console.error("Failed to submit the form", error);
+		const obj = { ano, serie, nome, aposta };
+		setDisabled(true);
+
+		const response = await sendAposta(obj);
+	};
+
+	const sendAposta = async (obj: {
+		ano: number;
+		serie: string;
+		nome: string;
+		aposta: number[];
+	}) => {
+		const response = await fetch(`http://localhost:3000/api/add-aposta/`, {
+			method: "POST",
+			body: JSON.stringify(obj),
+		});
+
+		if (response.status === 200) {
+			setMessage("Aposta recebida com sucesso");
+			setSeverity("success");
+			setOpen(true);
+		} else {
+			const { error } = await response.json();
+			setMessage(error);
+			setSeverity("error");
+			setOpen(true);
+			setDisabled(false);
 		}
+		return;
+	};
+
+	const handleClose = () => {
+		setOpen(false);
+		setMessage("");
 	};
 
 	if (!equipes) {
@@ -116,7 +134,7 @@ const Form = ({
 				Adicionar Aposta
 			</Typography>
 
-			<form name="basic" onSubmit={onFinish} autoComplete="off">
+			<form name="basic" onSubmit={(e) => onFinish(e)} autoComplete="off">
 				<TextField
 					label="Nome"
 					name="nome"
@@ -182,6 +200,15 @@ const Form = ({
 				>
 					{disabled ? "Aposta enviada" : "Enviar"}
 				</Button>
+				<Snackbar
+					open={open}
+					onClose={handleClose}
+					autoHideDuration={10000}
+				>
+					<Alert severity={severity} sx={{ width: "100%" }}>
+						{message}
+					</Alert>
+				</Snackbar>
 			</form>
 		</Container>
 	);
