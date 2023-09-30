@@ -1,7 +1,6 @@
 "use client";
 
 import {
-	Alert,
 	AlertColor,
 	Button,
 	Container,
@@ -9,11 +8,11 @@ import {
 	InputLabel,
 	MenuItem,
 	Select,
-	Snackbar,
 	TextField,
 	Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import ApostaSnackbar from "./Snackbar";
 
 const Form = ({
 	equipes,
@@ -27,15 +26,16 @@ const Form = ({
 	const [posicoes, setPosicoes] = useState<
 		{ equipe: string; posicao: number }[]
 	>([]);
-	const [numeros, setNumeros] = useState([
+	const numeros = [
 		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-	]);
+	];
 	const [usedNumeros, setUsedNumeros] = useState<number[]>([]);
 	const [nome, setNome] = useState("");
 	const [disabled, setDisabled] = useState(false);
-	const [open, setOpen] = useState(false);
-	const [severity, setSeverity] = useState<AlertColor>("info");
-	const [message, setMessage] = useState("");
+	const [snackbarData, setSnackbarData] = useState<{
+		message: string;
+		severity: AlertColor;
+	}>({ message: "", severity: "info" });
 
 	useEffect(() => {
 		if (equipes) {
@@ -97,27 +97,22 @@ const Form = ({
 			body: JSON.stringify(obj),
 		});
 
+		// resets the message to ensure Snackbar appears again in case of consecutive identical error messages
+		setSnackbarData({ message: "", severity: "info" });
+
 		if (response.status === 200) {
-			setMessage("Aposta recebida com sucesso");
-			setSeverity("success");
-			setOpen(true);
+			setSnackbarData({
+				message: "Aposta recebida com sucesso",
+				severity: "success",
+			});
 		} else {
 			const { error } = await response.json();
-			setMessage(error);
-			setSeverity("error");
-			setOpen(true);
+			setSnackbarData({ message: error, severity: "error" });
 			setDisabled(false);
 		}
-		return;
-	};
-
-	const handleClose = () => {
-		setOpen(false);
-		setMessage("");
 	};
 
 	if (!equipes) {
-		console.log("no props yet, will return null");
 		return null; // no props yet
 	}
 
@@ -200,16 +195,13 @@ const Form = ({
 				>
 					{disabled ? "Aposta enviada" : "Enviar"}
 				</Button>
-				<Snackbar
-					open={open}
-					onClose={handleClose}
-					autoHideDuration={10000}
-				>
-					<Alert severity={severity} sx={{ width: "100%" }}>
-						{message}
-					</Alert>
-				</Snackbar>
 			</form>
+			{snackbarData.message && (
+				<ApostaSnackbar
+					message={snackbarData.message}
+					severity={snackbarData.severity}
+				/>
+			)}
 		</Container>
 	);
 };
