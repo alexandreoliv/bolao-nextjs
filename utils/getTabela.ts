@@ -1,21 +1,25 @@
-const axios = require("axios");
-const API_KEY = process.env.REACT_APP_SECRET_KEY;
+import { NextResponse } from "next/server";
 
-export const getTabela = async (ano, serie) => {
+const API_KEY = process.env.APIFUTEBOL_KEY;
+
+export const getTabela2023A = async (ano, serie) => {
 	// API method:
-	if (ano === 2023 && serie === "A") {
+	if (ano === "2023" && serie === "A") {
 		// 	// offline way:
 		// 	let tabela = require("../data/tabela2023A.json");
 
 		// online way:
-		let tabela = await axios
-			.get("https://api.api-futebol.com.br/v1/campeonatos/10/tabela/", {
+		const response = await fetch(
+			"https://api.api-futebol.com.br/v1/campeonatos/10/tabela/",
+			{
+				method: "GET",
 				headers: {
 					Authorization: `Bearer ${API_KEY}`,
 				},
-			})
-			.then((response) => response.data)
-			.catch((error) => console.log(error));
+			}
+		);
+
+		let tabela = await response.json();
 
 		// for both ways:
 		tabela.sort((a, b) =>
@@ -23,14 +27,16 @@ export const getTabela = async (ano, serie) => {
 		);
 		const equipes = tabela.map((t) => t.time.nome_popular);
 		const posicoes = tabela.map((t) => t.posicao);
-		tabela = { ano, serie, equipes, posicoes };
-		return tabela;
-	}
+		tabela = { ano: parseInt(ano), serie, equipes, posicoes };
 
-	return await axios
-		.get(
-			`${process.env.REACT_APP_API_URL}/getTabelas?ano=${ano}&serie=${serie}`
-		)
-		.then((response) => response.data.tabelas[0])
-		.catch((error) => console.log(error));
+		const responseDb = await fetch(
+			`http://localhost:3000/api/add-tabela/`,
+			{
+				method: "POST",
+				body: JSON.stringify(tabela),
+			}
+		);
+		const newTabela = await responseDb.json();
+		return newTabela;
+	}
 };

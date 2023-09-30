@@ -5,13 +5,21 @@ import {
 	getApostasKeys,
 	getApostasRows,
 } from "./getApostas";
+import { getTabela2023A } from "./getTabela";
 
 export const getTabela = async (ano: string, serie: string) => {
-	const response = await fetch(
-		`http://localhost:3000/api/get-tabela/${ano}/${serie}`
-	);
-	const tabela: TabelaObject = await response.json();
-	return tabela;
+	if (ano !== "2023") {
+		const response = await fetch(
+			`http://localhost:3000/api/get-tabela/${ano}/${serie}`
+		);
+		const tabela: TabelaObject = await response.json();
+		return tabela;
+	} else {
+		if (serie === "A") {
+			const tabela = await getTabela2023A(ano, serie);
+			return tabela;
+		}
+	}
 };
 
 export const getClassificacaoTableData = (
