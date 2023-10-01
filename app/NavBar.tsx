@@ -1,72 +1,36 @@
 "use client";
 
-import AdbIcon from "@mui/icons-material/Adb";
-import MenuIcon from "@mui/icons-material/Menu";
-import AppBar from "@mui/material/AppBar";
-import Avatar from "@mui/material/Avatar";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Container from "@mui/material/Container";
-import IconButton from "@mui/material/IconButton";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import Toolbar from "@mui/material/Toolbar";
-import Tooltip from "@mui/material/Tooltip";
-import Typography from "@mui/material/Typography";
+import { AppBar, Box, Button, Container, Link, Toolbar } from "@mui/material";
+import NextLink from "next/link";
 import * as React from "react";
-
-const pages = ["Products", "Pricing", "Blog"];
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
+import YearMenu from "./YearMenu";
 
 function ResponsiveAppBar() {
-	const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
-		null
-	);
-	const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
-		null
+	const [anchorEls, setAnchorEls] = React.useState<Array<null | HTMLElement>>(
+		[null, null, null, null, null, null, null]
 	);
 
-	const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-		setAnchorElNav(event.currentTarget);
-	};
-	const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-		setAnchorElUser(event.currentTarget);
-	};
+	const years = ["2023", "2022", "2021", "2020"];
 
-	const handleCloseNavMenu = () => {
-		setAnchorElNav(null);
-	};
+	const handleClick =
+		(index: number) => (event: React.MouseEvent<HTMLElement>) => {
+			const newAnchorEls = [...anchorEls];
+			newAnchorEls[index] = event.currentTarget;
+			setAnchorEls(newAnchorEls);
+		};
 
-	const handleCloseUserMenu = () => {
-		setAnchorElUser(null);
+	const handleClose = (index: number) => () => {
+		const newAnchorEls = [...anchorEls];
+		newAnchorEls[index] = null;
+		setAnchorEls(newAnchorEls);
 	};
 
 	return (
 		<AppBar position="static">
 			<Container maxWidth="xl">
 				<Toolbar disableGutters>
-					<AdbIcon
-						sx={{ display: { xs: "none", md: "flex" }, mr: 1 }}
-					/>
-					<Typography
-						variant="h6"
-						noWrap
-						component="a"
-						href="#app-bar-with-responsive-menu"
-						sx={{
-							mr: 2,
-							display: { xs: "none", md: "flex" },
-							fontFamily: "monospace",
-							fontWeight: 700,
-							letterSpacing: ".3rem",
-							color: "inherit",
-							textDecoration: "none",
-						}}
-					>
-						LOGO
-					</Typography>
-
-					<Box
+					{/* Responsive menu for smaller screens */}
+					{/* <Box
 						sx={{
 							flexGrow: 1,
 							display: { xs: "flex", md: "none" },
@@ -77,14 +41,14 @@ function ResponsiveAppBar() {
 							aria-label="account of current user"
 							aria-controls="menu-appbar"
 							aria-haspopup="true"
-							onClick={handleOpenNavMenu}
+							onClick={handleClick}
 							color="inherit"
 						>
 							<MenuIcon />
 						</IconButton>
 						<Menu
 							id="menu-appbar"
-							anchorEl={anchorElNav}
+							anchorEl={anchorEl}
 							anchorOrigin={{
 								vertical: "bottom",
 								horizontal: "left",
@@ -94,25 +58,23 @@ function ResponsiveAppBar() {
 								vertical: "top",
 								horizontal: "left",
 							}}
-							open={Boolean(anchorElNav)}
-							onClose={handleCloseNavMenu}
+							open={Boolean(anchorEl)}
+							onClose={handleClose}
 							sx={{
 								display: { xs: "block", md: "none" },
 							}}
 						>
 							{pages.map((page) => (
-								<MenuItem
-									key={page}
-									onClick={handleCloseNavMenu}
-								>
+								<MenuItem key={page} onClick={handleClose}>
 									<Typography textAlign="center">
 										{page}
 									</Typography>
 								</MenuItem>
 							))}
 						</Menu>
-					</Box>
-					<AdbIcon
+					</Box> */}
+					{/* Real pages menu */}
+					{/* <AdbIcon
 						sx={{ display: { xs: "flex", md: "none" }, mr: 1 }}
 					/>
 					<Typography
@@ -132,62 +94,82 @@ function ResponsiveAppBar() {
 						}}
 					>
 						LOGO
-					</Typography>
+					</Typography> */}
 					<Box
 						sx={{
 							flexGrow: 1,
 							display: { xs: "none", md: "flex" },
 						}}
 					>
-						{pages.map((page) => (
-							<Button
-								key={page}
-								onClick={handleCloseNavMenu}
-								sx={{ my: 2, color: "white", display: "block" }}
-							>
-								{page}
-							</Button>
+						{years.map((year, index) => (
+							<YearMenu
+								key={year}
+								ano={year}
+								handleClick={handleClick(index)}
+								anchorEl={anchorEls[index]}
+								open={Boolean(anchorEls[index])}
+								handleClose={handleClose(index)}
+							/>
 						))}
-					</Box>
-
-					<Box sx={{ flexGrow: 0 }}>
-						<Tooltip title="Open settings">
-							<IconButton
-								onClick={handleOpenUserMenu}
-								sx={{ p: 0 }}
-							></IconButton>
-						</Tooltip>
-						<Menu
-							sx={{ mt: "45px" }}
-							id="menu-appbar"
-							anchorEl={anchorElUser}
-							anchorOrigin={{
-								vertical: "top",
-								horizontal: "right",
+						<Button
+							sx={{
+								my: 2,
+								mx: 1,
+								color: "white",
+								display: "block",
+								background: "white",
 							}}
-							keepMounted
-							transformOrigin={{
-								vertical: "top",
-								horizontal: "right",
-							}}
-							open={Boolean(anchorElUser)}
-							onClose={handleCloseUserMenu}
 						>
-							{settings.map((setting) => (
-								<MenuItem
-									key={setting}
-									onClick={handleCloseUserMenu}
-								>
-									<Typography textAlign="center">
-										{setting}
-									</Typography>
-								</MenuItem>
-							))}
-						</Menu>
+							<Link
+								href={"/regras"}
+								component={NextLink}
+								variant="inherit"
+								underline="none"
+							>
+								Regras
+							</Link>
+						</Button>
+						<Button
+							sx={{
+								my: 2,
+								mx: 1,
+								color: "white",
+								display: "block",
+								background: "white",
+							}}
+						>
+							<Link
+								href={"/add-aposta/2023/a"}
+								component={NextLink}
+								variant="inherit"
+								underline="none"
+							>
+								Add Aposta A
+							</Link>
+						</Button>
+						<Button
+							sx={{
+								my: 2,
+								mx: 1,
+								color: "white",
+								display: "block",
+								background: "white",
+							}}
+						>
+							<Link
+								href={"/add-aposta/2023/b"}
+								component={NextLink}
+								variant="inherit"
+								underline="none"
+							>
+								Add Aposta B
+							</Link>
+						</Button>
 					</Box>
 				</Toolbar>
 			</Container>
 		</AppBar>
 	);
 }
+
 export default ResponsiveAppBar;
