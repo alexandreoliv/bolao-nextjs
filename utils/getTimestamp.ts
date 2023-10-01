@@ -5,7 +5,6 @@ export const getTimestamp = (objectIdStr: string) => {
 	const unixTimestamp = objectId.getTimestamp().getTime() / 1000;
 	// const humanReadableTimestamp = objectId.getTimestamp();
 
-	// console.log("Unix Timestamp:", unixTimestamp);
 	return unixTimestamp;
 };
 
