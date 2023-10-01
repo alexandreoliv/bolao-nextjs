@@ -1,5 +1,6 @@
 "use client";
 
+import { numeros } from "@/utils/numeros";
 import {
 	AlertColor,
 	Button,
@@ -26,9 +27,6 @@ const Form = ({
 	const [posicoes, setPosicoes] = useState<
 		{ equipe: string; posicao: number }[]
 	>([]);
-	const numeros = [
-		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-	];
 	const [usedNumeros, setUsedNumeros] = useState<number[]>([]);
 	const [nome, setNome] = useState("");
 	const [disabled, setDisabled] = useState(false);
