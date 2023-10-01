@@ -2,8 +2,28 @@ import { prisma } from "@/prisma/client";
 import { validateTabela } from "@/utils/validateTabela";
 import { NextRequest, NextResponse } from "next/server";
 
+const tableNotFoundResponse = NextResponse.json(
+	{ error: "Tabela anterior não encontrada" },
+	{ status: 404 }
+);
+
+const tableNotDeletedResponse = NextResponse.json(
+	{ error: "Tabela anterior não pôde ser deletada" },
+	{ status: 400 }
+);
+
+const tableNotCreatedResponse = NextResponse.json(
+	{ error: "Tabela não pôde ser criada" },
+	{ status: 400 }
+);
+
 export async function POST(request: NextRequest) {
-	const body = await request.json();
+	const body: {
+		ano: number;
+		serie: string;
+		equipes: string[];
+		posicoes: number[];
+	} = await request.json();
 
 	const isValidTabela = validateTabela(body);
 	if (!isValidTabela) {
@@ -13,41 +33,43 @@ export async function POST(request: NextRequest) {
 	const { equipes, posicoes, ano } = body;
 	const serie = body.serie.toUpperCase();
 
-	let tabelaExists = await prisma.tabelas.findFirst({
+	const existingTabela = await prisma.tabelas.findFirst({
 		where: {
 			ano,
 			serie,
 		},
+		select: {
+			id: true,
+		},
 	});
 
-	if (tabelaExists) {
-		let response = await prisma.tabelas.deleteMany({
-			where: {
-				ano,
-				serie,
-			},
-		});
+	if (!existingTabela) return tableNotFoundResponse;
 
-		if (response) tabelaExists = false;
+	const deletedTabela = await prisma.tabelas.delete({
+		where: {
+			id: existingTabela.id,
+		},
+	});
 
-		if (!tabelaExists) {
-			response = await prisma.tabelas.create({
-				data: {
-					ano,
-					serie,
-					equipes,
-					posicoes,
-					v: 0,
-				},
-				select: {
-					ano: true,
-					serie: true,
-					equipes: true,
-					posicoes: true,
-				},
-			});
+	if (!deletedTabela) return tableNotDeletedResponse;
 
-			return NextResponse.json(response);
-		}
-	}
+	const createdTabela = await prisma.tabelas.create({
+		data: {
+			ano,
+			serie,
+			equipes,
+			posicoes,
+			v: 0,
+		},
+		select: {
+			ano: true,
+			serie: true,
+			equipes: true,
+			posicoes: true,
+		},
+	});
+
+	if (!createdTabela) return tableNotCreatedResponse;
+
+	return NextResponse.json(createdTabela);
 }
