@@ -1,16 +1,32 @@
-import { NextResponse } from "next/server";
-import { scrapeB } from "./scrapeB";
+import { TabelaObject } from "@/types";
+import { getTimestamp, isTimestampOld } from "@/utils/getTimestamp";
+import { scrapeB } from "@/utils/scrapeB";
 
 const API_KEY = process.env.APIFUTEBOL_KEY;
 
-export const getTabela2023A = async (ano, serie) => {
-	// API method:
-	if (ano === "2023" && serie === "A") {
-		// 	// offline way:
-		// 	let tabela = require("../data/tabela2023A.json");
+export const getTabela = async (ano: string, serie: string) => {
+	const response = await fetch(
+		`http://localhost:3000/api/get-tabela/${ano}/${serie}`
+	);
+	const tabela: TabelaObject = await response.json();
 
-		// online way:
-		const response = await fetch(
+	if (ano === "2023") {
+		const timestamp = getTimestamp(tabela.id);
+		const isOld = isTimestampOld(timestamp);
+		if (isOld) {
+			const newTabela =
+				serie === "A"
+					? await getTabela2023A(ano, serie)
+					: await getTabela2023B(ano, serie);
+			return newTabela;
+		}
+	}
+	return tabela;
+};
+
+export const getTabela2023A = async (ano: string, serie: string) => {
+	if (ano === "2023" && serie === "A") {
+		const responseApi = await fetch(
 			"https://api.api-futebol.com.br/v1/campeonatos/10/tabela/",
 			{
 				method: "GET",
@@ -20,15 +36,18 @@ export const getTabela2023A = async (ano, serie) => {
 			}
 		);
 
-		let tabela = await response.json();
+		const apiTabela = await responseApi.json();
 
-		// for both ways:
-		tabela.sort((a, b) =>
-			a.time.nome_popular.localeCompare(b.time.nome_popular)
+		const sortedApiTabela = apiTabela.sort(
+			(
+				a: { time: { nome_popular: string } },
+				b: { time: { nome_popular: string } }
+			) => a.time.nome_popular.localeCompare(b.time.nome_popular)
 		);
-		const equipes = tabela.map((t) => t.time.nome_popular);
-		const posicoes = tabela.map((t) => t.posicao);
-		tabela = { ano: parseInt(ano), serie, equipes, posicoes };
+
+		const equipes = sortedApiTabela.map((t: any) => t.time.nome_popular);
+		const posicoes = sortedApiTabela.map((t: any) => t.posicao);
+		const tabela = { ano: parseInt(ano), serie, equipes, posicoes };
 
 		const responseDb = await fetch(
 			`http://localhost:3000/api/add-tabela/`,
@@ -37,25 +56,22 @@ export const getTabela2023A = async (ano, serie) => {
 				body: JSON.stringify(tabela),
 			}
 		);
-		const newTabela = await responseDb.json();
-		return newTabela;
+
+		const createdTabela = await responseDb.json();
+		return createdTabela;
 	}
 };
 
-export const getTabela2023B = async (ano, serie) => {
-	// API method:
+export const getTabela2023B = async (ano: string, serie: string) => {
 	if (ano === "2023" && serie === "B") {
-		// 	// offline way:
-		// 	let tabela = require("../data/tabela2023A.json");
-
-		// online way:
-		const tabela = await scrapeB();
+		const scrapedTabela = await scrapeB();
 
 		const response = await fetch(`http://localhost:3000/api/add-tabela/`, {
 			method: "POST",
-			body: JSON.stringify(tabela),
+			body: JSON.stringify(scrapedTabela),
 		});
-		const newTabela = await response.json();
-		return newTabela;
+
+		const tabela = await response.json();
+		return tabela;
 	}
 };
