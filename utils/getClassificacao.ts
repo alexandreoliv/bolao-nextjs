@@ -6,21 +6,26 @@ import {
 	getApostasRows,
 } from "./getApostas";
 import { getTabela2023A, getTabela2023B } from "./getTabela";
+import { getTimestamp, isTimestampOld } from "./getTimestamp";
 
 export const getTabela = async (ano: string, serie: string) => {
-	if (ano !== "2023") {
-		const response = await fetch(
-			`http://localhost:3000/api/get-tabela/${ano}/${serie}`
-		);
-		const tabela: TabelaObject = await response.json();
-		return tabela;
-	} else if (serie === "A") {
-		const tabela = await getTabela2023A(ano, serie);
-		return tabela;
-	} else if (serie === "B") {
-		const tabela = await getTabela2023B(ano, serie);
-		return tabela;
+	const response = await fetch(
+		`http://localhost:3000/api/get-tabela/${ano}/${serie}`
+	);
+	const tabela: TabelaObject = await response.json();
+	if (ano === "2023") {
+		const timestamp = getTimestamp(tabela.id);
+		const isOld = isTimestampOld(timestamp);
+		console.log({ isOld });
+		if (isOld) {
+			const newTabela =
+				serie === "A"
+					? await getTabela2023A(ano, serie)
+					: await getTabela2023B(ano, serie);
+			return newTabela;
+		}
 	}
+	return tabela;
 };
 
 export const getClassificacaoTableData = (

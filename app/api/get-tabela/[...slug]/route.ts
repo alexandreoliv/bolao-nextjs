@@ -24,6 +24,7 @@ export async function GET(
 			serie,
 		},
 		select: {
+			id: true,
 			equipes: true,
 			posicoes: true,
 		},
