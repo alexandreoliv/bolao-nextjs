@@ -1,10 +1,11 @@
-const scrapeB = async () => {
+export const scrapeB = async () => {
 	const browser = await launchBrowser();
 	const page = await openPage(browser);
 	const tabela = await scrapeTabela(page);
 	const formattedTabela = formatTabela(tabela);
-	exportTabelaAsJSON(formattedTabela);
+	// exportTabelaAsJSON(formattedTabela);
 	await browser.close();
+	return formattedTabela;
 };
 
 const launchBrowser = () => {
@@ -14,7 +15,7 @@ const launchBrowser = () => {
 			width: 1920,
 			height: 1080,
 		},
-		headless: true,
+		headless: "new",
 	});
 	return browser;
 };
@@ -72,4 +73,4 @@ const exportTabelaAsJSON = (tabela) => {
 	);
 };
 
-scrapeB();
+// scrapeB();

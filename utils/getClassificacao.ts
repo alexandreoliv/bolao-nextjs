@@ -5,7 +5,7 @@ import {
 	getApostasKeys,
 	getApostasRows,
 } from "./getApostas";
-import { getTabela2023A } from "./getTabela";
+import { getTabela2023A, getTabela2023B } from "./getTabela";
 
 export const getTabela = async (ano: string, serie: string) => {
 	if (ano !== "2023") {
@@ -14,11 +14,12 @@ export const getTabela = async (ano: string, serie: string) => {
 		);
 		const tabela: TabelaObject = await response.json();
 		return tabela;
-	} else {
-		if (serie === "A") {
-			const tabela = await getTabela2023A(ano, serie);
-			return tabela;
-		}
+	} else if (serie === "A") {
+		const tabela = await getTabela2023A(ano, serie);
+		return tabela;
+	} else if (serie === "B") {
+		const tabela = await getTabela2023B(ano, serie);
+		return tabela;
 	}
 };
 
