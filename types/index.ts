@@ -14,6 +14,7 @@ export type TabelaObject = {
 	// TODO: check whether type or interface should be used
 	equipes: string[];
 	posicoes: number[];
+	id: string;
 };
 
 export type TableData = {

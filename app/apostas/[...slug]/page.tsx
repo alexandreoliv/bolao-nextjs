@@ -1,7 +1,7 @@
 import DataTable from "@/app/DataTable";
 import { Props } from "@/types";
 import { getApostas, getApostasTableData } from "@/utils/getApostas";
-import { getTabela } from "@/utils/getClassificacao";
+import { getTabela } from "@/utils/getTabela";
 import { validateAnoSerieSlug } from "@/utils/validateAnoSerieSlug";
 
 const ApostasPage = async ({ params: { slug } }: Props) => {
