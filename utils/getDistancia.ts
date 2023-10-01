@@ -1,10 +1,10 @@
 import { ApostasProps, TabelaObject, TableData } from "@/types";
-import { GridColDef } from "@mui/x-data-grid";
 import {
 	getApostasColumns,
 	getApostasKeys,
 	getApostasRows,
-} from "./getApostas";
+} from "@/utils/getApostas";
+import { GridColDef } from "@mui/x-data-grid";
 
 export const getDistanciaTableData = (
 	tabela: TabelaObject,

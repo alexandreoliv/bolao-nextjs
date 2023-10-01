@@ -1,6 +1,5 @@
 import DataTable from "@/app/DataTable";
 import { GridColDef } from "@mui/x-data-grid";
-import React from "react";
 
 const rows = [
 	{

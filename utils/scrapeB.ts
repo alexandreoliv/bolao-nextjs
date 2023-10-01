@@ -3,7 +3,6 @@ export const scrapeB = async () => {
 	const page = await openPage(browser);
 	const tabela = await scrapeTabela(page);
 	const formattedTabela = formatTabela(tabela);
-	// exportTabelaAsJSON(formattedTabela);
 	await browser.close();
 	return formattedTabela;
 };
@@ -60,17 +59,3 @@ const formatTabela = (tabela) => {
 	newTabela = { ano: 2023, serie: "B", equipes, posicoes };
 	return newTabela;
 };
-
-const exportTabelaAsJSON = (tabela) => {
-	const fs = require("fs");
-	fs.writeFile(
-		"../data/tabela2023B.json",
-		JSON.stringify(tabela),
-		function (err) {
-			if (err) throw err;
-			console.log("tabela2023B.json complete");
-		}
-	);
-};
-
-// scrapeB();
