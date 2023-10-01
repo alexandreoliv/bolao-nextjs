@@ -1,50 +1,5 @@
 import { numeros } from "@/utils/numeros";
-
-const equipesA = [
-	"América-MG",
-	"Athletico-PR",
-	"Atlético-MG",
-	"Bahia",
-	"Botafogo",
-	"Bragantino",
-	"Corinthians",
-	"Coritiba",
-	"Cruzeiro",
-	"Cuiabá",
-	"Flamengo",
-	"Fluminense",
-	"Fortaleza",
-	"Goiás",
-	"Grêmio",
-	"Internacional",
-	"Palmeiras",
-	"Santos",
-	"São Paulo",
-	"Vasco",
-];
-
-const equipesB = [
-	"ABC",
-	"Atlético Goianiense",
-	"Avaí",
-	"Botafogo-SP",
-	"Ceará",
-	"Chapecoense",
-	"CRB",
-	"Criciúma",
-	"Guarani",
-	"Ituano",
-	"Juventude",
-	"Londrina",
-	"Mirassol",
-	"Novorizontino",
-	"Ponte Preta",
-	"Sampaio Corrêa",
-	"Sport",
-	"Tombense",
-	"Vila Nova",
-	"Vitória",
-];
+import { equipesA, equipesB } from "@/utils/equipes";
 
 export const validateTabela = (body: {
 	ano: number;

@@ -1,0 +1,48 @@
+// for data creation/validation purposes
+// applies to year 2023 only
+
+export const equipesA = [
+	"América-MG",
+	"Athletico-PR",
+	"Atlético-MG",
+	"Bahia",
+	"Botafogo",
+	"Bragantino",
+	"Corinthians",
+	"Coritiba",
+	"Cruzeiro",
+	"Cuiabá",
+	"Flamengo",
+	"Fluminense",
+	"Fortaleza",
+	"Goiás",
+	"Grêmio",
+	"Internacional",
+	"Palmeiras",
+	"Santos",
+	"São Paulo",
+	"Vasco",
+];
+
+export const equipesB = [
+	"ABC",
+	"Atlético Goianiense",
+	"Avaí",
+	"Botafogo-SP",
+	"Ceará",
+	"Chapecoense",
+	"CRB",
+	"Criciúma",
+	"Guarani",
+	"Ituano",
+	"Juventude",
+	"Londrina",
+	"Mirassol",
+	"Novorizontino",
+	"Ponte Preta",
+	"Sampaio Corrêa",
+	"Sport",
+	"Tombense",
+	"Vila Nova",
+	"Vitória",
+];
