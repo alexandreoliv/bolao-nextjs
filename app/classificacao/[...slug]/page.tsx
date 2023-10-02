@@ -1,4 +1,5 @@
 import DataTable from "@/app/DataTable";
+import Title from "@/components/Title";
 import { Props } from "@/types";
 import { getApostas } from "@/utils/getApostas";
 import { getClassificacaoTableData } from "@/utils/getClassificacao";
@@ -15,7 +16,12 @@ const ClassificacaoPage = async ({ params: { slug } }: Props) => {
 	const tabela = await getTabela(ano, serie); // TODO: add error handling
 	const tableData = getClassificacaoTableData(tabela, apostas);
 
-	return <DataTable tableData={tableData} />;
+	return (
+		<>
+			<Title title={`Classificação ${ano} Série ${serie}`} />
+			<DataTable tableData={tableData} />
+		</>
+	);
 };
 
 export default ClassificacaoPage;

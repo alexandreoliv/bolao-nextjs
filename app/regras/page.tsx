@@ -1,4 +1,5 @@
 import DataTable from "@/app/DataTable";
+import Title from "@/components/Title";
 import { GridColDef } from "@mui/x-data-grid";
 
 const rows = [
@@ -60,7 +61,12 @@ const tableData = {
 };
 
 const RegrasPage = () => {
-	return <DataTable tableData={tableData} />;
+	return (
+		<>
+			<Title title={"Regras"} />
+			<DataTable tableData={tableData} />
+		</>
+	);
 };
 
 export default RegrasPage;

@@ -1,8 +1,9 @@
 import DataTable from "@/app/DataTable";
+import Title from "@/components/Title";
 import { Props } from "@/types";
 import { getApostas } from "@/utils/getApostas";
-import { getTabela } from "@/utils/getClassificacao";
 import { getDistanciaTableData } from "@/utils/getDistancia";
+import { getTabela } from "@/utils/getTabela";
 import { validateAnoSerieSlug } from "@/utils/validateAnoSerieSlug";
 
 const DistanciaPage = async ({ params: { slug } }: Props) => {
@@ -16,7 +17,10 @@ const DistanciaPage = async ({ params: { slug } }: Props) => {
 	const tableData = getDistanciaTableData(tabela, apostas);
 
 	return (
+		<>
+			<Title title={`Distância ${ano} Série ${serie}`} />
 			<DataTable tableData={tableData} />
+		</>
 	);
 };
 
