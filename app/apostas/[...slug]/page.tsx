@@ -1,4 +1,5 @@
 import DataTable from "@/app/DataTable";
+import Title from "@/components/Title";
 import { Props } from "@/types";
 import { getApostas, getApostasTableData } from "@/utils/getApostas";
 import { getTabela } from "@/utils/getTabela";
@@ -15,7 +16,10 @@ const ApostasPage = async ({ params: { slug } }: Props) => {
 	const tableData = getApostasTableData(tabela, apostas);
 
 	return (
+		<>
+			<Title title={`Apostas ${ano} Série ${serie}`} />
 			<DataTable tableData={tableData} />
+		</>
 	);
 };
 

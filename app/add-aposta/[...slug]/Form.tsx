@@ -10,7 +10,6 @@ import {
 	MenuItem,
 	Select,
 	TextField,
-	Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import ApostaSnackbar from "./Snackbar";
@@ -21,7 +20,7 @@ const Form = ({
 	serie,
 }: {
 	equipes: string[];
-	ano: number;
+	ano: string;
 	serie: string;
 }) => {
 	const [posicoes, setPosicoes] = useState<
@@ -78,7 +77,7 @@ const Form = ({
 			(e) => posicoes.find((p) => p.equipe === e)?.posicao!
 		);
 
-		const obj = { ano, serie, nome, aposta };
+		const obj = { ano: parseInt(ano), serie, nome, aposta };
 		setDisabled(true);
 
 		const response = await sendAposta(obj);
@@ -116,17 +115,6 @@ const Form = ({
 
 	return (
 		<Container>
-			<Typography
-				variant="h4"
-				style={{
-					fontWeight: "bold",
-					margin: "0 0 10px 10px",
-					textAlign: "center",
-				}}
-			>
-				Adicionar Aposta
-			</Typography>
-
 			<form name="basic" onSubmit={(e) => onFinish(e)} autoComplete="off">
 				<TextField
 					label="Nome"
